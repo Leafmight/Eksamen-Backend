@@ -2,6 +2,8 @@ package rest;
 
 import DTO.PersonDTO;
 import com.google.gson.Gson;
+import com.mashape.unirest.http.JsonNode;
+import com.mashape.unirest.http.exceptions.UnirestException;
 import entities.User;
 import fetch.DataFromSwappi;
 import java.io.IOException;
@@ -14,6 +16,7 @@ import java.util.concurrent.ExecutionException;
 import javax.annotation.security.RolesAllowed;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.Produces;
@@ -81,10 +84,11 @@ public class DemoResource {
     
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("people")
-    @RolesAllowed({"admin","user"})
-    public List<PersonDTO> getSwappiData() throws MalformedURLException, IOException, InterruptedException, ExecutionException{
-    return dfs.getPeople();
+    @Path("UK")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public List<String> getUKData() throws MalformedURLException, IOException, InterruptedException, ExecutionException{
+       
+        return dfs.getUKData();
   }
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -93,5 +97,13 @@ public class DemoResource {
         stu.fill();
     return "Setup Complete!";
     }
-
+    
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("flightdata")
+    public String getFlightStuff() throws UnirestException {
+        
+    return dfs.getFlightData().toString();
+    }
+    
 }
