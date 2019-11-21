@@ -15,14 +15,14 @@ public class FlightInfoDTO {
     private String endDestination;
     private String departure;
     private String arrival;
-    private long duration;
-    private long price;
+    private int duration;
+    private double price;
     private String deeplinkUrl;
 
     public FlightInfoDTO() {
     }
 
-    public FlightInfoDTO(String id, String startDestination, String endDestination, String departure, String arrival, long duration, long price, String deeplinkUrl) {
+    public FlightInfoDTO(String id, String startDestination, String endDestination, String departure, String arrival, int duration, double price, String deeplinkUrl) {
         this.id = id;
         this.startDestination = startDestination;
         this.endDestination = endDestination;
@@ -73,19 +73,19 @@ public class FlightInfoDTO {
         this.arrival = arrival;
     }
 
-    public long getDuration() {
+    public int getDuration() {
         return duration;
     }
 
-    public void setDuration(long duration) {
+    public void setDuration(int duration) {
         this.duration = duration;
     }
 
-    public long getPrice() {
+    public double getPrice() {
         return price;
     }
 
-    public void setPrice(long price) {
+    public void setPrice(double price) {
         this.price = price;
     }
 

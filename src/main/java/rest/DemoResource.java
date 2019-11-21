@@ -1,5 +1,6 @@
 package rest;
 
+import DTO.FlightInfoDTO;
 import DTO.PersonDTO;
 import com.google.gson.Gson;
 import com.mashape.unirest.http.JsonNode;
@@ -101,9 +102,9 @@ public class DemoResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("flightdata")
-    public String getFlightStuff() throws UnirestException {
+    public List<FlightInfoDTO> getFlightStuff() throws UnirestException {
         
-    return dfs.getFlightData().toString();
+    return dfs.getFlightData();
     }
     
 }

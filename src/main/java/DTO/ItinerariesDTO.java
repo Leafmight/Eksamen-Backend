@@ -17,13 +17,13 @@ package DTO;
 public class ItinerariesDTO {
     private String outboundLegId;
     private String inboundLegId;
-    private long price;
+    private double price;
     private String deeplinkUrl;
 
     public ItinerariesDTO() {
     }
 
-    public ItinerariesDTO(String outboundLegId, String inboundLegId, long price, String deeplinkUrl) {
+    public ItinerariesDTO(String outboundLegId, String inboundLegId, double price, String deeplinkUrl) {
         this.outboundLegId = outboundLegId;
         this.inboundLegId = inboundLegId;
         this.price = price;
@@ -46,11 +46,11 @@ public class ItinerariesDTO {
         this.inboundLegId = inboundLegId;
     }
 
-    public long getPrice() {
+    public double getPrice() {
         return price;
     }
 
-    public void setPrice(long price) {
+    public void setPrice(double price) {
         this.price = price;
     }
 
@@ -66,5 +66,6 @@ public class ItinerariesDTO {
     public String toString() {
         return "ItinerariesDTO{" + "outboundLegId=" + outboundLegId + ", inboundLegId=" + inboundLegId + ", price=" + price + ", deeplinkUrl=" + deeplinkUrl + '}';
     }
-     
+    
+    
 }
