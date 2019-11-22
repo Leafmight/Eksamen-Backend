@@ -20,17 +20,32 @@ import org.json.JSONArray;
  *
  * @author jacobfolkehildebrandt
  */
-public class DataFromSwappi {
+public class DataFromSkyscanner {
 
-    public DataFromSwappi() {
+    public DataFromSkyscanner() {
     }
 
-    public String getKey() throws UnirestException {
+    public String getSessionKey(String outboundDate, String cabinClass, String originPlace, String destinationPlace, int adults ) throws UnirestException {
+        HttpResponse<JsonNode> response = Unirest.post("https://skyscanner-skyscanner-flight-search-v1.p.rapidapi.com/apiservices/pricing/v1.0")
+                .header("X-RapidAPI-Host", "skyscanner-skyscanner-flight-search-v1.p.rapidapi.com")
+                .header("X-RapidAPI-Key", "4dfa3d7cb0msh7701660655f1502p13c7cbjsn3a351650d218")
+                .header("Content-Type", "application/x-www-form-urlencoded")
+                .field("outboundDate", outboundDate) // ("outboundDate", "2019-12-01")
+                .field("cabinClass", cabinClass)  // ("cabinClass", "business")
+                .field("children", 0)
+                .field("infants", 0)
+                .field("country", "DK")
+                .field("currency", "DKK")
+                .field("locale", "da-DK")
+                .field("originPlace", originPlace) // ("originPlace", "SFO-sky")
+                .field("destinationPlace", destinationPlace) //("destinationPlace", "LHR-sky")
+                .field("adults", adults) // ("adults", 1)
+                .asJson();
+        
         String sessionKey = "";
-        DataFromSwappi swap = new DataFromSwappi();
         String location = "";
 
-        for (Map.Entry<String, List<String>> entry : swap.getTestData().getHeaders().entrySet()) {
+        for (Map.Entry<String, List<String>> entry : response.getHeaders().entrySet()) {
             Object key = entry.getKey();
             Object value = entry.getValue();
             if (key.equals("Location")) {
@@ -39,53 +54,17 @@ public class DataFromSwappi {
 
         }
 
+            System.out.println("----- location: "+ location);
         for (int i = location.length() - 37; i < location.length() - 1; i++) {
             sessionKey += location.charAt(i);
         }
-
+        
         return sessionKey;
     }
+    
 
-    public List<String> getUKData() throws MalformedURLException, IOException {
-        List<String> list = new ArrayList();
-        URL url = new URL("http://partners.api.skyscanner.net/apiservices/pricing/v1.0");
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-        con.setRequestMethod("POST");
-        con.setRequestProperty("Accept", "application/json");
-        con.setRequestProperty("x-rapidapi-host", "skyscanner-skyscanner-flight-search-v1.p.rapidapi.com");
-        con.setRequestProperty("x-rapidapi-key", "4dfa3d7cb0msh7701660655f1502p13c7cbjsn3a351650d218");
-        con.setRequestProperty("content-type", "application/x-www-form-urlencoded");
-
-        Map<String, List<String>> map = con.getHeaderFields();
-        for (Map.Entry entry : map.entrySet()) {
-            list.add(entry.getKey() + " : " + entry.getValue());
-        }
-
-        return list;
-    }
-
-    public HttpResponse<JsonNode> getTestData() throws UnirestException {
-        HttpResponse<JsonNode> response = Unirest.post("https://skyscanner-skyscanner-flight-search-v1.p.rapidapi.com/apiservices/pricing/v1.0")
-                .header("X-RapidAPI-Host", "skyscanner-skyscanner-flight-search-v1.p.rapidapi.com")
-                .header("X-RapidAPI-Key", "4dfa3d7cb0msh7701660655f1502p13c7cbjsn3a351650d218")
-                .header("Content-Type", "application/x-www-form-urlencoded")
-                .field("outboundDate", "2019-12-01")
-                .field("inboundDate", "2019-12-10")
-                .field("cabinClass", "business")
-                .field("children", 0)
-                .field("infants", 0)
-                .field("country", "US")
-                .field("currency", "USD")
-                .field("locale", "en-US")
-                .field("originPlace", "SFO-sky")
-                .field("destinationPlace", "LHR-sky")
-                .field("adults", 1)
-                .asJson();
-        return response;
-    }
-
-    public List<FlightInfoDTO> getFlightData() throws UnirestException {
-        String sessionkey = getKey();
+    public List<FlightInfoDTO> getFlightData(String outboundDate, String cabinClass, String originPlace, String destinationPlace, int adults) throws UnirestException {
+        String sessionkey = getSessionKey(outboundDate, cabinClass, originPlace, destinationPlace, adults);
         HttpResponse<JsonNode> response = Unirest.get(
                 "https://skyscanner-skyscanner-flight-search-v1.p.rapidapi.com/apiservices/pricing/uk2/v1.0/"
                 + sessionkey + "?pageIndex=0&pageSize=10")
@@ -96,7 +75,6 @@ public class DataFromSwappi {
         JSONArray listItineraries = response.getBody().getObject().getJSONArray("Itineraries");
         JSONArray listLegs = response.getBody().getObject().getJSONArray("Legs");
         JSONArray listPricingOptions;
-        String inboundLegId;
         String outboundLegId;
         double price;
         String deeplinkUrl;
@@ -112,11 +90,10 @@ public class DataFromSwappi {
         for (int i = 0; i < listItineraries.length(); i++) {
             listPricingOptions = (JSONArray) listItineraries.getJSONObject(i).get("PricingOptions");
             outboundLegId = listItineraries.getJSONObject(i).get("OutboundLegId").toString();
-            inboundLegId = listItineraries.getJSONObject(i).get("InboundLegId").toString();
             for (int j = 0; j < listPricingOptions.length(); j++) {
                 price = (double) listPricingOptions.getJSONObject(j).get("Price");
                 deeplinkUrl = listPricingOptions.getJSONObject(j).get("DeeplinkUrl").toString();
-                ItinerariesDTO itinerariesDTO = new ItinerariesDTO(outboundLegId, inboundLegId, price, deeplinkUrl);
+                ItinerariesDTO itinerariesDTO = new ItinerariesDTO(outboundLegId, price, deeplinkUrl);
                 listItinerariesDTO.add(itinerariesDTO);
                 // System.out.println("DTO----------- " + itinerariesDTO);
             }
@@ -129,7 +106,7 @@ public class DataFromSwappi {
             duration = (int) listLegs.getJSONObject(i).get("Duration");
             for (int j = 0; j < listItinerariesDTO.size(); j++) {
                 if (listItinerariesDTO.get(j).getOutboundLegId().equals(id)) {
-                    FlightInfoDTO flightInfoDTO = new FlightInfoDTO(id, "Test", "Test", departure, arrival, duration, listItinerariesDTO.get(j).getPrice(), listItinerariesDTO.get(j).getDeeplinkUrl());
+                    FlightInfoDTO flightInfoDTO = new FlightInfoDTO(id, originPlace, destinationPlace, departure, arrival, duration, listItinerariesDTO.get(j).getPrice(), listItinerariesDTO.get(j).getDeeplinkUrl());
                     listFlightInfoDTO.add(flightInfoDTO);
                 }
 
@@ -141,8 +118,8 @@ public class DataFromSwappi {
     }
 
     public static void main(String[] args) throws InterruptedException, ExecutionException, UnirestException {
-        DataFromSwappi swap = new DataFromSwappi();
-        System.out.println(swap.getFlightData());
+        DataFromSkyscanner swap = new DataFromSkyscanner();
+        System.out.println(swap.getFlightData("2019-12-01", "business", "SFO-sky", "LHR-sky", 1));
 
     }
 

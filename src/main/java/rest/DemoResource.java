@@ -6,7 +6,7 @@ import com.google.gson.Gson;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import entities.User;
-import fetch.DataFromSwappi;
+import fetch.DataFromSkyscanner;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -36,7 +36,7 @@ import utils.SetupTestUsers;
 public class DemoResource {
 
     private static EntityManagerFactory EMF = EMF_Creator.createEntityManagerFactory(EMF_Creator.DbSelector.DEV, EMF_Creator.Strategy.CREATE);
-    private static DataFromSwappi dfs = new DataFromSwappi();
+    private static DataFromSkyscanner dfs = new DataFromSkyscanner();
     private static SetupTestUsers stu = new SetupTestUsers();
     @Context
     private UriInfo context;
@@ -82,29 +82,32 @@ public class DemoResource {
         String thisuser = securityContext.getUserPrincipal().getName();
         return "{\"msg\": \"Hello to (admin) User: " + thisuser + "\"}";
     }
-    
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("UK")
-    @Consumes(MediaType.APPLICATION_JSON)
-    public List<String> getUKData() throws MalformedURLException, IOException, InterruptedException, ExecutionException{
-       
-        return dfs.getUKData();
-  }
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("setup")
     public String setUp() {
         stu.fill();
-    return "Setup Complete!";
+        return "Setup Complete!";
     }
-    
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("flightdata")
-    public List<FlightInfoDTO> getFlightStuff() throws UnirestException {
-        
-    return dfs.getFlightData();
+    @Path("flightdata/{outboundDate}/{cabinClass}/{originPlace}/{destinationPlace}/{adults}")
+    public List<FlightInfoDTO> getFlightStuff(
+            @PathParam("outboundDate") String outboundDate, 
+            @PathParam("cabinClass") String cabinClass, 
+            @PathParam("originPlace") String originPlace, 
+            @PathParam("destinationPlace") String destinationPlace, 
+            @PathParam("adults") int adults) throws UnirestException {
+        System.out.println(outboundDate);
+        System.out.println(cabinClass);
+        System.out.println(originPlace);
+        System.out.println(destinationPlace);
+        System.out.println(adults);
+
+        return dfs.getFlightData(outboundDate, cabinClass, originPlace, destinationPlace, adults);
+            
     }
-    
+
 }
