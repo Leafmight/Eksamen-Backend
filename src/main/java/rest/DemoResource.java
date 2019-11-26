@@ -7,6 +7,7 @@ import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import entities.User;
 import fetch.DataFromSkyscanner;
+import fetch.DataToBiggusDickus;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -37,6 +38,7 @@ public class DemoResource {
 
     private static EntityManagerFactory EMF = EMF_Creator.createEntityManagerFactory(EMF_Creator.DbSelector.DEV, EMF_Creator.Strategy.CREATE);
     private static DataFromSkyscanner dfs = new DataFromSkyscanner();
+    private static DataToBiggusDickus dtbd = new DataToBiggusDickus();
     private static SetupTestUsers stu = new SetupTestUsers();
     @Context
     private UriInfo context;
@@ -107,6 +109,23 @@ public class DemoResource {
         System.out.println(adults);
 
         return dfs.getFlightData(outboundDate, cabinClass, originPlace, destinationPlace, adults);
+            
+    }
+    
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("flightdata2/{outboundDate}/{cabinClass}/{destinationPlace}/{adults}")
+    public List<FlightInfoDTO> getFlightToBiggusDickus(
+            @PathParam("outboundDate") String outboundDate, 
+            @PathParam("cabinClass") String cabinClass, 
+            @PathParam("destinationPlace") String destinationPlace, 
+            @PathParam("adults") int adults) throws UnirestException {
+        System.out.println(outboundDate);
+        System.out.println(cabinClass);
+        System.out.println(destinationPlace);
+        System.out.println(adults);
+
+        return dtbd.getFlightData(outboundDate, cabinClass, destinationPlace, adults);
             
     }
 
