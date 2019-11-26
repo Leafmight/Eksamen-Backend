@@ -18,14 +18,16 @@ public class ItinerariesDTO {
     private String outboundLegId;
     private double price;
     private String deeplinkUrl;
+    private int agents;
 
     public ItinerariesDTO() {
     }
 
-    public ItinerariesDTO(String outboundLegId, double price, String deeplinkUrl) {
+    public ItinerariesDTO(String outboundLegId, double price, String deeplinkUrl, int agents) {
         this.outboundLegId = outboundLegId;
         this.price = price;
         this.deeplinkUrl = deeplinkUrl;
+        this.agents = agents;
     }
 
     public String getOutboundLegId() {
@@ -53,10 +55,19 @@ public class ItinerariesDTO {
         this.deeplinkUrl = deeplinkUrl;
     }
 
+    public int getAgents() {
+        return agents;
+    }
+
+    public void setAgents(int agents) {
+        this.agents = agents;
+    }
+
     @Override
     public String toString() {
-        return "ItinerariesDTO{" + "outboundLegId=" + outboundLegId + ", price=" + price + ", deeplinkUrl=" + deeplinkUrl + '}';
+        return "ItinerariesDTO{" + "outboundLegId=" + outboundLegId + ", price=" + price + ", deeplinkUrl=" + deeplinkUrl + ", agents=" + agents + '}';
     }
+
     
     
 }

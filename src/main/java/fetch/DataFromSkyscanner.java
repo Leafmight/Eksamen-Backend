@@ -1,5 +1,6 @@
 package fetch;
 
+import DTO.AgentsDTO;
 import DTO.FlightInfoDTO;
 import DTO.ItinerariesDTO;
 import com.mashape.unirest.http.HttpResponse;
@@ -25,13 +26,13 @@ public class DataFromSkyscanner {
     public DataFromSkyscanner() {
     }
 
-    public String getSessionKey(String outboundDate, String cabinClass, String originPlace, String destinationPlace, int adults ) throws UnirestException {
+    public String getSessionKey(String outboundDate, String cabinClass, String originPlace, String destinationPlace, int adults) throws UnirestException {
         HttpResponse<JsonNode> response = Unirest.post("https://skyscanner-skyscanner-flight-search-v1.p.rapidapi.com/apiservices/pricing/v1.0")
                 .header("X-RapidAPI-Host", "skyscanner-skyscanner-flight-search-v1.p.rapidapi.com")
                 .header("X-RapidAPI-Key", "4dfa3d7cb0msh7701660655f1502p13c7cbjsn3a351650d218")
                 .header("Content-Type", "application/x-www-form-urlencoded")
                 .field("outboundDate", outboundDate) // ("outboundDate", "2019-12-01")
-                .field("cabinClass", cabinClass)  // ("cabinClass", "business")
+                .field("cabinClass", cabinClass) // ("cabinClass", "business")
                 .field("children", 0)
                 .field("infants", 0)
                 .field("country", "DK")
@@ -41,7 +42,7 @@ public class DataFromSkyscanner {
                 .field("destinationPlace", destinationPlace) //("destinationPlace", "LHR-sky")
                 .field("adults", adults) // ("adults", 1)
                 .asJson();
-        
+
         String sessionKey = "";
         String location = "";
 
@@ -54,14 +55,13 @@ public class DataFromSkyscanner {
 
         }
 
-            System.out.println("----- location: "+ location);
+        System.out.println("----- location: " + location);
         for (int i = location.length() - 37; i < location.length() - 1; i++) {
             sessionKey += location.charAt(i);
         }
-        
+
         return sessionKey;
     }
-    
 
     public List<FlightInfoDTO> getFlightData(String outboundDate, String cabinClass, String originPlace, String destinationPlace, int adults) throws UnirestException {
         String sessionkey = getSessionKey(outboundDate, cabinClass, originPlace, destinationPlace, adults);
@@ -75,9 +75,11 @@ public class DataFromSkyscanner {
         JSONArray listItineraries = response.getBody().getObject().getJSONArray("Itineraries");
         JSONArray listLegs = response.getBody().getObject().getJSONArray("Legs");
         JSONArray listPricingOptions;
+        JSONArray listAgents;
         String outboundLegId;
         double price;
         String deeplinkUrl;
+        int agents;
         List<ItinerariesDTO> listItinerariesDTO = new ArrayList();
 
         // Flightinfo
@@ -87,31 +89,58 @@ public class DataFromSkyscanner {
         int duration;
         List<FlightInfoDTO> listFlightInfoDTO = new ArrayList();
 
+        //Agent info
+        List<AgentsDTO> listAgentsDTO = new ArrayList<>();
+        JSONArray listAgentsId = response.getBody().getObject().getJSONArray("Agents");
+        int agentsId;
+        String agentsName;
+        String imageUrl;
+
         for (int i = 0; i < listItineraries.length(); i++) {
             listPricingOptions = (JSONArray) listItineraries.getJSONObject(i).get("PricingOptions");
             outboundLegId = listItineraries.getJSONObject(i).get("OutboundLegId").toString();
             for (int j = 0; j < listPricingOptions.length(); j++) {
                 price = (double) listPricingOptions.getJSONObject(j).get("Price");
                 deeplinkUrl = listPricingOptions.getJSONObject(j).get("DeeplinkUrl").toString();
-                ItinerariesDTO itinerariesDTO = new ItinerariesDTO(outboundLegId, price, deeplinkUrl);
+                listAgents = (JSONArray) listPricingOptions.getJSONObject(j).get("Agents");
+                agents = (int) listAgents.getInt(0);
+//                System.out.println("-----AGENTS: " + agents);
+                ItinerariesDTO itinerariesDTO = new ItinerariesDTO(outboundLegId, price, deeplinkUrl, agents);
                 listItinerariesDTO.add(itinerariesDTO);
                 // System.out.println("DTO----------- " + itinerariesDTO);
             }
             //System.out.println("Legs: " + listLegs.length() + "---- Itine: " + listItineraries.length());
         }
+
+        for (int i = 0; i < listAgentsId.length(); i++) {
+            agentsId = (int) listAgentsId.getJSONObject(i).get("Id");
+            agentsName = listAgentsId.getJSONObject(i).get("Name").toString();
+            imageUrl = listAgentsId.getJSONObject(i).get("ImageUrl").toString();
+            AgentsDTO agentsDTO = new AgentsDTO(agentsId, agentsName, imageUrl);
+            listAgentsDTO.add(agentsDTO);
+        }
+
         for (int i = 0; i < listLegs.length(); i++) {
             id = listLegs.getJSONObject(i).get("Id").toString();
             departure = listLegs.getJSONObject(i).get("Departure").toString();
             arrival = listLegs.getJSONObject(i).get("Arrival").toString();
             duration = (int) listLegs.getJSONObject(i).get("Duration");
+
             for (int j = 0; j < listItinerariesDTO.size(); j++) {
                 if (listItinerariesDTO.get(j).getOutboundLegId().equals(id)) {
-                    FlightInfoDTO flightInfoDTO = new FlightInfoDTO(id, originPlace, destinationPlace, departure, arrival, duration, listItinerariesDTO.get(j).getPrice(), listItinerariesDTO.get(j).getDeeplinkUrl());
-                    listFlightInfoDTO.add(flightInfoDTO);
+                            FlightInfoDTO flightInfoDTO = new FlightInfoDTO(id, originPlace, destinationPlace, departure, arrival, duration, listItinerariesDTO.get(j).getPrice(), listItinerariesDTO.get(j).getDeeplinkUrl());
+                    for (int k = 0; k < listAgentsDTO.size(); k++) {
+                        if (listAgentsDTO.get(k).getId() == listItinerariesDTO.get(j).getAgents()) {
+                            flightInfoDTO.setAgentsName(listAgentsDTO.get(k).getName());
+                            flightInfoDTO.setImageUrl(listAgentsDTO.get(k).getImageUrl());
+                        }
+                    }
+                            listFlightInfoDTO.add(flightInfoDTO);
+                            System.out.println(flightInfoDTO);
+
                 }
 
             }
-
         }
 
         return listFlightInfoDTO;

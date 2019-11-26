@@ -18,6 +18,8 @@ public class FlightInfoDTO {
     private int duration;
     private double price;
     private String deeplinkUrl;
+    private String agentsName;
+    private String imageUrl;
 
     public FlightInfoDTO() {
     }
@@ -97,10 +99,30 @@ public class FlightInfoDTO {
         this.deeplinkUrl = deeplinkUrl;
     }
 
+    public String getAgentsName() {
+        return agentsName;
+    }
+
+    public void setAgentsName(String agentsName) {
+        this.agentsName = agentsName;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
     @Override
     public String toString() {
-        return "FlightInfoDTO{" + "id=" + id + ", startDestination=" + startDestination + ", endDestination=" + endDestination + ", departure=" + departure + ", arrival=" + arrival + ", duration=" + duration + ", price=" + price + ", deeplinkUrl=" + deeplinkUrl + '}';
+        return "FlightInfoDTO{" + "id=" + id + ", startDestination=" + startDestination + ", endDestination=" + endDestination + ", departure=" + departure + ", arrival=" + arrival + ", duration=" + duration + ", price=" + price + ", deeplinkUrl=" + deeplinkUrl + ", agentsName=" + agentsName + ", imageUrl=" + imageUrl + '}';
     }
+    
+    
+
+
     
     
 }
