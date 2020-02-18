@@ -5,14 +5,19 @@
  */
 package DTO;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  *
  * @author jacobfolkehildebrandt
  */
 public class FlightInfoDTO {
     private String id;
+    @Schema(required = true,example = "CPH-sky")
     private String startDestination;
+    @Schema(required = true,example = "MAN-sky")
     private String endDestination;
+    @Schema(required = true,example = "2019-12-24")
     private String departure;
     private String arrival;
     private int duration;
